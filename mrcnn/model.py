@@ -1276,7 +1276,7 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
 
     if 'posClasses' in dataset.image_info[image_id]:
         # extract active_class_ids from dataset.image_info[image_id]
-        image_class_ids = set (dataset.image_info[image_id]["posClasses"] + dataset.image_info[image_id]["negClasses"])
+        image_class_ids = sorted(set(dataset.image_info[image_id]["posClasses"] + dataset.image_info[image_id]["negClasses"]))
         active_class_ids[image_class_ids] = 1
     else:
         source_class_ids = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
