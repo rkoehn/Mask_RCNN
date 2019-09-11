@@ -1093,6 +1093,7 @@ def mrcnn_class_loss_graph(target_class_ids, pred_class_logits,
     pred_class_ids = tf.argmax(pred_class_logits, axis=2)
     # TODO: Update this line to work with batch > 1. Right now it assumes all
     #       images in a batch have the same active_class_ids
+    # TODO: Fix this for Open Images, where every image has its own list of active classes
     pred_active = tf.gather(active_class_ids[0], pred_class_ids)
 
     # Loss
@@ -1272,8 +1273,14 @@ def load_image_gt(dataset, config, image_id, augment=False, augmentation=None,
     # Different datasets have different classes, so track the
     # classes supported in the dataset of this image.
     active_class_ids = np.zeros([dataset.num_classes], dtype=np.int32)
-    source_class_ids = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
-    active_class_ids[source_class_ids] = 1
+
+    if 'posClasses' in dataset.image_info[image_id]:
+        # extract active_class_ids from dataset.image_info[image_id]
+        image_class_ids = set (dataset.image_info[image_id]["posClasses"] + dataset.image_info[image_id]["negClasses"])
+        active_class_ids[image_class_ids] = 1
+    else:
+        source_class_ids = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
+        active_class_ids[source_class_ids] = 1
 
     # Resize masks to smaller size to reduce memory usage
     if use_mini_mask:
